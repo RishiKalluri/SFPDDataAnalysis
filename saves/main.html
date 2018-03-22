@@ -23,3 +23,31 @@
   </body>
 
 </html>
+
+
+<!-- Form Section -->
+<section id="contact">
+  <div class="container">
+    <h2 class="text-center text-uppercase text-secondary mb-0">Most Likely Dispatch</h2>
+    <hr class="star-dark mb-5">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+          <form action = "{{ url_for('likelyDispatch') }}" method = "POST">
+          <div class="input text">
+            <div class="form-group floating-label-form-group controls mb-0 pb-2">
+              <label>Zip Code</label>
+              <input class = "form-control" id = "zipCode" type = "text" placeholder = "Zip Code" required = "required" data-validation-required-message="Please enter desired zip code.">
+              <p class="help-block text-danger"></p>
+            </div>
+          </div>
+          <br>
+          <div id="success"></div>
+          <div class="input submit">
+            <input type="submit" class="btn btn-primary btn-xl" id="sendMessageButton" value = "Submit">
+          </div>
+        </form>
+        <h2 class="text-center text-uppercase text-secondary mb-0">{{zipCode}}</h2>
+      </div>
+    </div>
+  </div>
+</section>
