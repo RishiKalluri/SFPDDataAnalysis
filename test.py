@@ -79,7 +79,7 @@ def makeAverageDispatch():
             time2 = datetime.datetime(year = int(receivedYear), month = int(receivedMonth), day = int(receivedDate), hour = int(receivedHours), minute = int(receivedMinutes), second = int(receivedSeconds))
 
             diff = time1 - time2
-            diff = diff.seconds
+            diff = diff.total_seconds()
 
 
 
@@ -153,6 +153,21 @@ def makeLine():
     plt.ylabel('Number of Calls Received by SFPD')
     plt.show()
 
+def likelyDispatch():
+
+    file = open('sfpd_dispatch_data_subset.csv')
+
+    csvFile1 = csv.reader(file)
+    csvFile = []
+    dispatches = []
+
+    for row in csvFile1:
+        csvFile.append(row)
+
+    for item in csvFile:
+        dispatches.append(item[27])
+
+    print dispatches
 
 
-makeLine()
+likelyDispatch()
