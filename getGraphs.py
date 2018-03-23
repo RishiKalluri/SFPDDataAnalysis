@@ -62,8 +62,6 @@ def makePie():
     plt.axis('equal')
     plt.savefig('pieChart.png')
 
-
-
 def sort(array):
     less = []
     equal = []
@@ -135,12 +133,13 @@ def makeAverageDispatch():
             time2 = datetime.datetime(year = int(receivedYear), month = int(receivedMonth), day = int(receivedDate), hour = int(receivedHours), minute = int(receivedMinutes), second = int(receivedSeconds))
 
             diff = time1 - time2
-            diff = diff.seconds
-
-
+            diff = diff.total_seconds()
 
             if row[17] == zipCodes[i]:
                 store.append(diff)
+
+        print store
+        break;
 
         for index in store:
             sum = sum + index
@@ -226,7 +225,49 @@ def makeLine():
     plt.ylabel('Number of Calls Received by SFPD')
     figure3.savefig('lineGraph.png')
 
+def makeHeatmap():
+    latitude = []
+    longitude = []
 
-makePie()
-makeAverageDispatch()
-makeLine()
+    file = open('sfpd_dispatch_data_subset.csv')
+
+    csvFile1 = csv.reader(file)
+    csvFile = []
+
+    for row in csvFile1:
+        csvFile.append(row)
+
+    for row in csvFile:
+
+        latitude.append(row[34])
+        longitude.append(row[35])
+
+    file.close()
+
+    for row in latitude:
+        row = float(row)
+
+    for row in longitude:
+        row = float(row)
+
+    fig, ax = plt.subplots()
+
+    latitude = np.array(latitude).astype(np.float)
+    longitude = np.array(longitude).astype(np.float)
+    latitude = pd.DataFrame(latitude)
+    longitude = pd.DataFrame(longitude)
+
+    hex_ax = ax.hexbin(x = latitude, y= longitude, gridsize = 50)
+    plt.xlabel('Latitude')
+    plt.ylabel('Longitude')
+    plt.title('Distribution of Received Calls over GPS Location')
+
+    plt.savefig("heatplotCalls.png")
+
+def getGraphs():
+    makePie()
+    makeAverageDispatch()
+    makeLine()
+    makeHeatmap()
+
+getGraphs()
