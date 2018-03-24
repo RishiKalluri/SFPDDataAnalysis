@@ -278,7 +278,6 @@ def makeHeatmap():
 
     plt.savefig("heatplotCalls2.png")
 
-
 def fourTypes():
     data_frame = pd.read_csv('./sfpd_dispatch_data_subset.csv')
 
@@ -496,8 +495,101 @@ def dayTrend():
     plt.legend(loc='upper right', prop={'size': 5.5})
     plt.xlabel('Day (January ##, 2018)')
     plt.ylabel('Number of Calls')
-    plt.title('Calls Over Thirteen Day Period')
+    plt.title('Totaal Number of Calls Over 12 Days')
     ax.set_xticks(days)
-    fig.savefig('dayTrend.png')
+    fig.savefig('dayTrend1.png')
 
-makeLine()
+def getHourArray(zipCode):
+    file = open('sfpd_dispatch_data_subset.csv')
+
+    array = []
+
+    hours = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+
+    csvFile1 = csv.reader(file)
+    csvFile = []
+
+    for row in csvFile1:
+        csvFile.append(row)
+
+    for row in hours:
+        count = 0
+        for item in csvFile:
+            if (int(item[6][11:13])==row) and (item[17]==zipCode) :
+                count = count + 1
+        count = count
+        array.append(count)
+
+    file.close()
+
+    return array
+
+def hourTrend():
+    file = open('sfpd_dispatch_data_subset.csv')
+
+    csvFile1 = csv.reader(file)
+    csvFile = []
+
+    for row in csvFile1:
+        csvFile.append(row)
+
+    temp = []
+    zipCodes = []
+
+    for element in csvFile1:
+        csvFile.append(element)
+
+    for view in csvFile:
+        temp.append(view[17])
+
+    temp = sort(temp)
+
+    for index in temp:
+        if index not in zipCodes:
+            zipCodes.append(index)
+
+    hours = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+
+    file.close()
+
+    figure = plt.figure()
+    figure, ax = plt.subplots()
+    plt.plot(hours, getHourArray(zipCodes[0]), label = zipCodes[0])
+    plt.plot(hours, getHourArray(zipCodes[1]), label = zipCodes[1])
+    plt.plot(hours, getHourArray(zipCodes[2]), label = zipCodes[2])
+    plt.plot(hours, getHourArray(zipCodes[3]), label = zipCodes[3])
+    plt.plot(hours, getHourArray(zipCodes[4]), label = zipCodes[4])
+    plt.plot(hours, getHourArray(zipCodes[5]), label = zipCodes[5])
+    plt.plot(hours, getHourArray(zipCodes[6]), label = zipCodes[6])
+    plt.plot(hours, getHourArray(zipCodes[7]), label = zipCodes[7])
+    plt.plot(hours, getHourArray(zipCodes[8]), label = zipCodes[8])
+    plt.plot(hours, getHourArray(zipCodes[9]), label = zipCodes[9])
+    plt.plot(hours, getHourArray(zipCodes[10]), label = zipCodes[10])
+    plt.plot(hours, getHourArray(zipCodes[11]), label = zipCodes[11])
+    plt.plot(hours, getHourArray(zipCodes[12]), label = zipCodes[12])
+    plt.plot(hours, getHourArray(zipCodes[13]), label = zipCodes[13])
+    plt.plot(hours, getHourArray(zipCodes[14]), label = zipCodes[14])
+    plt.plot(hours, getHourArray(zipCodes[15]), label = zipCodes[15])
+    plt.plot(hours, getHourArray(zipCodes[16]), label = zipCodes[16])
+    plt.plot(hours, getHourArray(zipCodes[17]), label = zipCodes[17])
+    plt.plot(hours, getHourArray(zipCodes[18]), label = zipCodes[18])
+    plt.plot(hours, getHourArray(zipCodes[19]), label = zipCodes[19])
+    plt.plot(hours, getHourArray(zipCodes[20]), label = zipCodes[20])
+    plt.plot(hours, getHourArray(zipCodes[21]), label = zipCodes[21])
+    plt.plot(hours, getHourArray(zipCodes[22]), label = zipCodes[22])
+    plt.plot(hours, getHourArray(zipCodes[23]), label = zipCodes[23])
+    plt.plot(hours, getHourArray(zipCodes[24]), label = zipCodes[24])
+    plt.plot(hours, getHourArray(zipCodes[25]), label = zipCodes[25])
+    plt.plot(hours, getHourArray(zipCodes[26]), label = zipCodes[26])
+
+    hours = [0,2,4,6,8,10,12,14,16, 18,20,22]
+
+    plt.legend(loc='upper right', prop={'size': 5.5})
+    plt.xlabel('Hour of the Day')
+    plt.ylabel('Number of Calls')
+    ax.set_xticks(hours)
+    plt.title('Total Number of Calls per Hour Over 12 Days')
+    figure.savefig('totalCalls1.png')
+
+dayTrend()
+hourTrend()
