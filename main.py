@@ -5,6 +5,7 @@ from matplotlib.figure import Figure
 from flask import Flask, Markup, render_template, request
 import datetime
 from flask_bootstrap import Bootstrap
+import math
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -23,14 +24,34 @@ def sort(array):
                 equal.append(x)
             if x > pivot:
                 greater.append(x)
-        # Don't forget to return something!
-        return sort(less)+equal+sort(greater)  # Just use the + operator to join lists
-    # Note that you want equal ^^^^^ not pivot
-    else:  # You need to hande the part at the end of the recursion - when you only have one element in your array, just return the array.
+        return sort(less)+equal+sort(greater)
+    else:
         return array
 
+def getDistance(latitude, longitude):
+    distance = math.pow((math.pow(latitude,2) + math.pow(longitude, 2)),0.5)
+    return distance
 
+def replaceDistance(array, distance):
 
+    array = sort(array)
+    x = 0
+    changeValue = False
+    holdValue = 0
+    while(x < len(array)):
+        if distance > array[x]:
+            changeValue = True
+            holdValue = x
+        else:
+            break
+        x = x + 1
+
+    if changeValue:
+        array[holdValue] = distance
+        print array[holdValue]
+        return array
+    else:
+        return array
 
 @app.route("/")
 
@@ -43,7 +64,8 @@ def likelyDispatch():
 
     if request.method == "POST":
 
-        zipCode = request.form.get("zipCode")
+        latitude = request.form.get("latitude")
+        longitude = request.form.get("longitude")
         time = request.form.get("time")
 
 
@@ -57,43 +79,34 @@ def likelyDispatch():
         for view in csvFile1:
             csvFile.append(view)
 
+        closestLat = 0
+        closestLong = 0
+        distanceDiff = 100
 
-        temp = []
-        zipCodes = []
+        for row in csvFile:
 
-        for view in csvFile:
-            temp.append(view[17])
+            trueDistance = 0
+            longDiff = 0
+            latDiff = 0
 
-        temp = sort(temp)
+            latDiff = abs(float(latitude) - float(row[34]))
 
-        for index in temp:
-            if index not in zipCodes:
-                zipCodes.append(index)
+            longDiff = abs(float(longitude) - float(row[35]))
 
-        closestZip = 0
-        zipDiff = 500000
-        zipIndex = 0
+            trueDistance = getDistance(latDiff, longDiff)
 
-        for row in zipCodes:
+            if distanceDiff >= trueDistance:
 
-            tempDiff = 0
+                closestLat = row[34]
+                closestLong = row[35]
+                distanceDiff = trueDistance
 
-            if int(zipCode) > int(row):
-                tempDiff = int(zipCode) - int(row)
-            else:
-                tempDiff = int(row) - int(zipCode)
-
-            if zipDiff > tempDiff:
-                closestZip = row
-                zipDiff = tempDiff
-
-
-        storeDiff = datetime.timedelta(hours = 2)
+        storeDiff = datetime.timedelta(hours = 24)
         likelyDispatch = ''
 
         for row in csvFile:
 
-            if row[17]==closestZip:
+            if -0.02 <= getDistance(float(latitude) - float(row[34]), float(longitude) - float(row[35])) <= 0.02 :
 
                 compareYear = row[6][0:4]
                 compareMonth = row[6][5:7]
@@ -101,6 +114,7 @@ def likelyDispatch():
                 compareHours = time[0:2]
                 compareMinutes = time[3:5]
                 compareSeconds = time[6:8]
+
 
                 time1 = datetime.datetime(year = int(compareYear), month = int(compareMonth), day = int(compareDate), hour = int(compareHours), minute = int(compareMinutes), second = int(compareSeconds))
 
@@ -117,15 +131,19 @@ def likelyDispatch():
 
                 if time1 > time2:
                     temp = time1 - time2
+                    print(temp)
                 else:
                     temp = time2 - time1
+                    print(temp)
 
                 if storeDiff.total_seconds() > temp.total_seconds():
                     likelyDispatch = row[27]
+                    print(likelyDispatch)
                     storeDiff = temp
 
         file.close()
-        return render_template('index.html', response = likelyDispatch)
+
+        return render_template('index.html', response = 'Dispatch: ' + likelyDispatch)
 
 
 if __name__ == "__main__":
