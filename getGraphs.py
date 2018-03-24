@@ -495,9 +495,9 @@ def dayTrend():
     plt.legend(loc='upper right', prop={'size': 5.5})
     plt.xlabel('Day (January ##, 2018)')
     plt.ylabel('Number of Calls')
-    plt.title('Totaal Number of Calls Over 12 Days')
+    plt.title('Total Number of Calls per Day Over 12 Days')
     ax.set_xticks(days)
-    fig.savefig('dayTrend1.png')
+    fig.savefig('dayTrend3.png')
 
 def getHourArray(zipCode):
     file = open('sfpd_dispatch_data_subset.csv')
@@ -592,4 +592,3 @@ def hourTrend():
     figure.savefig('totalCalls1.png')
 
 dayTrend()
-hourTrend()
