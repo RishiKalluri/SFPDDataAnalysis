@@ -32,65 +32,6 @@ def getZipCodes():
 
     file.close()
 
-def makePie():
-
-    #This method creates pie chart detailing the distributions of call types
-    #in the data set
-
-    #Initializes counter for call types
-    callType = []
-    medicalIncident = 0
-    alarms = 0
-    fire = 0
-    structureFire = 0
-    vehicleFire = 0
-    outsideFire = 0
-    trafficCollision = 0
-    citizenAssist = 0
-    other = 0
-
-    #Reads csv into usable array
-    file = open('sfpd_dispatch_data_subset.csv')
-    csvFile = csv.reader(file)
-    #Creates array of all call types, in order, in the dataset
-    for row in csvFile:
-        callType.append(row[3])
-
-    #Iterates through array of call types and incriments appropriate counter
-    x = 0
-    while (x < len(callType)):
-        if callType[x] == 'Medical Incident':
-            medicalIncident = medicalIncident + 1
-        elif callType[x] == 'Alarms':
-            alarms = alarms + 1
-        elif callType[x] == 'Structure Fire':
-            structureFire = structureFire + 1
-            fire = fire + 1
-        elif callType[x] == 'Vehicle Fire':
-            vehicleFire = vehicleFire + 1
-            fire = fire + 1
-        elif callType[x] == 'Outside Fire':
-            outsideFire = outsideFire + 1
-            fire = fire + 1
-        elif callType[x] == 'Traffic Collision':
-            trafficCollision = trafficCollision + 1
-        else:
-            other = other + 1
-        x = x + 1
-
-    file.close()
-
-    # Plotting Data in Pie Chart
-    labels = 'Medical Incident', 'Alarms', 'Fire', 'Traffic Collision', 'Other'
-    sizes = [medicalIncident, alarms, fire, trafficCollision, other]
-    colors = ['gold', 'yellowgreen', 'lightcoral', 'lavender', 'turquoise']
-    explode = (0.1, 0, 0, 0, 0)
-    fig1 = plt.figure()
-    plt.pie(sizes, explode = explode, labels = labels, colors = colors,  autopct='%1.1f%%', shadow=True, startangle=140)
-    plt.title('Distribution of Types of Calls')
-    plt.axis('equal')
-    plt.savefig('pieChart.png')
-
 def sort(array):
 
     #This method follows the quicksort algorithim and sorts an array in increasing order
@@ -530,5 +471,4 @@ def getGraphs():
     safestAreas()
 
 #Calls method to get all graphs that are used in the webapp
-#getGraphs()
-hourTrend()
+getGraphs()
