@@ -22,7 +22,6 @@ entrypoints==0.2.3
 enum34==1.1.6
 Flask==0.12.2
 Flask-Bootstrap==3.3.7.1
-futures==3.2.0
 geojson==2.3.0
 gmaps==0.7.3
 gunicorn==19.7.1
