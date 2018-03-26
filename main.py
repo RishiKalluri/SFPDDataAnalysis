@@ -2,7 +2,7 @@ from flask import Flask,  render_template, request
 import datetime
 from flask_bootstrap import Bootstrap
 import pandas as pd
-from datetime import timedelta
+from datetime import datetime, timedelta
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 
