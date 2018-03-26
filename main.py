@@ -79,7 +79,7 @@ def index():
 @app.route("/index.html", methods = ['POST'])
 def likelyDispatch():
 
-    #Makes sure that method is only called when form data is POSTed
+    #Makes sure that method is only called when form data is submitted as a POST request
     if request.method == "POST":
 
         #Retrieve data from submitted form
