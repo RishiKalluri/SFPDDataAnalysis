@@ -18,50 +18,12 @@ from sklearn.metrics import classification_report, confusion_matrix
 app = Flask(__name__)
 Bootstrap(app)
 
-def sort(array):
-    less = []
-    equal = []
-    greater = []
-
-    if len(array) > 1:
-        pivot = array[0]
-        for x in array:
-            if x < pivot:
-                less.append(x)
-            if x == pivot:
-                equal.append(x)
-            if x > pivot:
-                greater.append(x)
-        return sort(less)+equal+sort(greater)
-    else:
-        return array
-
-def getDistance(latitude, longitude):
-    distance = math.pow((math.pow(latitude,2) + math.pow(longitude, 2)),0.5)
-    return distance
-
-def replaceDistance(array, distance):
-
-    array = sort(array)
-    x = 0
-    changeValue = False
-    holdValue = 0
-    while(x < len(array)):
-        if distance > array[x]:
-            changeValue = True
-            holdValue = x
-        else:
-            break
-        x = x + 1
-
-    if changeValue:
-        array[holdValue] = distance
-        print array[holdValue]
-        return array
-    else:
-        return array
-
 def mostLikelyDispatch(lat, lon, time):
+
+    #This method uses the K nearest neighbour model to predic the most likely dispatch Type
+    #based on the GPS coordintes and the time given
+
+    #creates dataset with desired fields
     names = ['latitude', 'longitude', "received_timestamp", 'unit_type']
     dataset = pd.read_csv('./sfpd_dispatch_data_subset_knn.csv')
     dataset = pd.DataFrame(dataset, columns = names)
@@ -97,12 +59,14 @@ def mostLikelyDispatch(lat, lon, time):
     #Normalize Columns, so there is no "overpowering" values
     scaler = StandardScaler()
     scaler.fit(xtrain)
-
     xtrain = scaler.transform(xtrain)
     input = scaler.transform(input)
 
-    classifier = KNeighborsClassifier(n_neighbors = 5)
+    #Initialize classifier and train model with normalized dataset
+    classifier = KNeighborsClassifier(n_neighbors = 3)
     classifier.fit(xtrain, ytrain)
+
+    #Input and return prediction
     output = classifier.predict(input)
     return output
 
@@ -115,17 +79,37 @@ def index():
 @app.route("/index.html", methods = ['POST'])
 def likelyDispatch():
 
+    #Makes sure that method is only called when form data is POSTed
+
     if request.method == "POST":
+
+        #Retrieve data from submitted form
 
         latitude = request.form.get("latitude")
         longitude = request.form.get("longitude")
         time = request.form.get("time")
 
-        likelyDispatch = mostLikelyDispatch(latitude, longitude, time)
-        print likelyDispatch
+        #Ensure data is within given GPS coordinates
 
-        return render_template('index.html', response = 'Dispatch: ' + likelyDispatch)
+        if (37.70 <= latitude <=37.84) and (-122.52 <= longitude <= -122.36):
 
+
+            try:
+
+                #Uses K Nearest Neighbour to predict most likely dispatch type
+                likelyDispatch = mostLikelyDispatch(latitude, longitude, time)
+                return render_template('index.html', response = 'Dispatch: ' + likelyDispatch)
+
+            except Exception as exception:
+
+                #In case time is inputted in a wrong format, or other error occurs
+                print exception
+                return render_template('index.html', response =  str(exception))
+
+        else:
+
+            #Print error message if Coordinates are out of range
+            return render_template('index.html', response = 'Enter GPS Coordinates between (37.70, -122.52) and (37.84, -122.36)')
 
 if __name__ == "__main__":
     app.run(debug = True)
