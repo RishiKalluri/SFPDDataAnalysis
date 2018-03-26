@@ -8,11 +8,36 @@ import matplotlib.colors as colors
 import pandas as pd
 
 
+def getZipCodes():
 
+    #Reads csv file into usable array
+    file = open('sfpd_dispatch_data_subset.csv')
+    csvFile1 = csv.reader(file)
+    csvFile = []
+    for row in csvFile1:
+        csvFile.append(row)
 
+    #Creates sorted array of zip codes without repetitions
+    temp = []
+    zipCodes = []
+    for element in csvFile1:
+        csvFile.append(element)
+    for view in csvFile:
+        temp.append(view[17])
+    temp = sort(temp)
+    for index in temp:
+        if index not in zipCodes:
+            zipCodes.append(index)
+    return zipCodes
+
+    file.close()
 
 def makePie():
 
+    #This method creates pie chart detailing the distributions of call types
+    #in the data set
+
+    #Initializes counter for call types
     callType = []
     medicalIncident = 0
     alarms = 0
@@ -24,13 +49,14 @@ def makePie():
     citizenAssist = 0
     other = 0
 
+    #Reads csv into usable array
     file = open('sfpd_dispatch_data_subset.csv')
-
     csvFile = csv.reader(file)
-
+    #Creates array of all call types, in order, in the dataset
     for row in csvFile:
         callType.append(row[3])
 
+    #Iterates through array of call types and incriments appropriate counter
     x = 0
     while (x < len(callType)):
         if callType[x] == 'Medical Incident':
@@ -52,7 +78,6 @@ def makePie():
             other = other + 1
         x = x + 1
 
-
     file.close()
 
     # Plotting Data in Pie Chart
@@ -67,6 +92,8 @@ def makePie():
     plt.savefig('pieChart.png')
 
 def sort(array):
+
+    #This method follows the quicksort algorithim and sorts an array in increasing order
     less = []
     equal = []
     greater = []
@@ -86,40 +113,35 @@ def sort(array):
 
 def makeAverageDispatch():
 
-    file = open('sfpd_dispatch_data_subset.csv')
+    #This method creates a graph of the average dispatch times per zip code
 
+    #Reads csv data file into usable array
+    file = open('sfpd_dispatch_data_subset.csv')
     csvFile1 = csv.reader(file)
     csvFile = []
-
     for row in csvFile1:
         csvFile.append(row)
-
-
-
-    temp = []
-    zipCodes = []
-    averageDispatch = []
-
     for element in csvFile1:
         csvFile.append(element)
 
-    for view in csvFile:
-        temp.append(view[17])
+    #Creates a sorted array containing the zip codes in the dataset, without repetition
+    zipCodes = getZipCodes()
 
-    temp = sort(temp)
+    #Initialize array to hold the average dispatch times per array, with
+    #corresponding indices
+    averageDispatch = []
 
-    for index in temp:
-        if index not in zipCodes:
-            zipCodes.append(index)
-
+    #Iterate through zip codes to calculate average dispatch time
     i = 0
     while(i < len(zipCodes)):
 
+        #len(store) serves as a counter to divide by when calculating the average
         store = []
         sum = 0
 
         for row in csvFile:
 
+            #corresponding indicies to datetime object parameters
             dispatchYear = row[8][0:4]
             dispatchMonth = row[8][5:7]
             dispatchDate = row[8][8:10]
@@ -127,8 +149,10 @@ def makeAverageDispatch():
             dispatchMinutes = row[8][14:16]
             dispatchSeconds = row[8][17:19]
 
+            #make datetime object for dispatch timestamp
             time1 = datetime.datetime(year = int(dispatchYear), month = int(dispatchMonth), day = int(dispatchDate), hour = int(dispatchHours), minute = int(dispatchMinutes), second = int(dispatchSeconds))
 
+            #corresponding indicies to datetime object parameters
             receivedYear = row[6][0:4]
             receivedMonth = row[6][5:7]
             receivedDate = row[6][8:10]
@@ -136,36 +160,39 @@ def makeAverageDispatch():
             receivedMinutes = row[6][14:16]
             receivedSeconds = row[6][17:19]
 
+            #make datetime object for received timestamp
             time2 = datetime.datetime(year = int(receivedYear), month = int(receivedMonth), day = int(receivedDate), hour = int(receivedHours), minute = int(receivedMinutes), second = int(receivedSeconds))
 
+            #calulate difference between time (results in datetime.timedelta object)
             diff = time1 - time2
-            diff = diff.seconds
 
+            #converts time difference to seconds
+            diff = diff.total_seconds()
 
-
+            #check if zip code is the same as the current iteration, to ensure indices corresond
             if row[17] == zipCodes[i]:
                 store.append(diff)
 
+        #computes average dispatch time
         for index in store:
             sum = sum + index
-
         average = sum / len(store)
 
+        #dipatch average is added to correspond with the zip code of the same index
         averageDispatch.append(average)
+
+        #increment counter
         i = i + 1
 
     file.close()
 
+    #graph average dispatch time per zip code and save figure as "barGraph1.png"
     arangedZipCodes = np.arange(len(zipCodes))
-    arangedAverageDispatch = np.arange(len(averageDispatch))
-
-
-
     ccmap = ["#ff12ff", "#ff31e2" , "#ff50c5",
-"#ff6fa8","#ff8d8b","#ffac6e","#ffcb51","#ffd647","#ffcd50",
-"#ffc458","#ffba61","#ffb16a","#ffa873","#ff9e7c","#eb9369",
-"#d78856","#c27d43","#ae7230","#9a671d","#865b0a","#725907",
-"#5f5f15","#4c6523","#396b32","#267240", "#13784e", "#007e5c"]
+        "#ff6fa8","#ff8d8b","#ffac6e","#ffcb51","#ffd647","#ffcd50",
+        "#ffc458","#ffba61","#ffb16a","#ffa873","#ff9e7c","#eb9369",
+        "#d78856","#c27d43","#ae7230","#9a671d","#865b0a","#725907",
+        "#5f5f15","#4c6523","#396b32","#267240", "#13784e", "#007e5c"]
     fig2 = plt.figure()
     plt.barh(arangedZipCodes, averageDispatch, align = 'center', color = ccmap)
     plt.xlabel('Time from Received Timestamp to Dispatch Timestamp', fontsize = 5)
@@ -174,133 +201,62 @@ def makeAverageDispatch():
     plt.title('Average Time to Dispatch per Zip Code')
     fig2.savefig('barGraph1.png')
 
-def makeLine():
-    file = open('sfpd_dispatch_data_subset.csv')
+def makeHeatmap():
 
+    #This method creates a heatmap showing the distribution of calls over GPS location
+
+    #Reads csv file into usable row
+    file = open('sfpd_dispatch_data_subset.csv')
     csvFile1 = csv.reader(file)
     csvFile = []
-    times = []
-    timeCounter = []
-
     for row in csvFile1:
         csvFile.append(row)
-
-    y = 0
-    while (y < 24):
-        times.append(y)
-        y = y+1
-
-    medicalLine = []
-    fireLine = []
-    alarmLine = []
-    trafficLine = []
-    otherLine = []
-
-    x = 0
-    while (x < len(times)):
-        medicalCount = 0
-        fireCount = 0
-        alarmCount = 0
-        trafficCount = 0
-        otherCount = 0
-        for row in csvFile:
-            if (int(row[6][11:13]) == x) and (row[3]=='Medical Incident'):
-                medicalCount = medicalCount + 1
-            elif (int(row[6][11:13]) == x) and ("Fire" in row[3] ):
-                fireCount = fireCount + 1
-            elif (int(row[6][11:13]) == x) and (row[3]=='Alarms'):
-                alarmCount = alarmCount + 1
-            elif (int(row[6][11:13]) == x) and (row[3]=='Traffic Collision'):
-                trafficCount = trafficCount + 1
-            elif (int(row[6][11:13]) == x):
-                otherCount = otherCount + 1
-        medicalLine.append(medicalCount)
-        fireLine.append(fireCount)
-        alarmLine.append(alarmCount)
-        trafficLine.append(trafficCount)
-        otherLine.append(otherCount)
-        x = x + 1
-
     file.close()
 
-    hours = [0,2,4,6,8,10,12,14,16, 18,20,22]
-
-    figure3 = plt.figure()
-    figure3, ax = plt.subplots()
-    plt.plot(times, medicalLine, label = 'Medical Incidents')
-    plt.plot(times, fireLine, label = 'Fire')
-    plt.plot(times, alarmLine, label = 'Alarms')
-    plt.plot(times, trafficLine, label = 'Traffic Collisions')
-    plt.plot(times, otherLine, label = 'Other')
-    plt.legend()
-    ax.set_xticks(hours)
-    plt.xlabel('Time (Hours)')
-    plt.ylabel('Number of Calls Received by SFPD')
-    plt.title('Calls over Twenty Four Hour Period')
-    figure3.savefig('lineGraph2.png')
-
-def makeHeatmap():
+    #Reads latitude and longitude into respective arrays for use in graphs and analysis
     latitude = []
     longitude = []
-
-    file = open('sfpd_dispatch_data_subset.csv')
-
-    csvFile1 = csv.reader(file)
-    csvFile = []
-
-    for row in csvFile1:
-        csvFile.append(row)
-
     for row in csvFile:
+        latitude.append(float(row[34]))
+        longitude.append(float(row[35]))
 
-        latitude.append(row[34])
-        longitude.append(row[35])
-
-    file.close()
-
-    for row in latitude:
-        row = float(row)
-
-    for row in longitude:
-        row = float(row)
-
+    #Plots data into hexbin plot using histogram style graphing, where occurances
+    #are binned together over a certain region
     fig, ax = plt.subplots()
-
     latitude = np.array(latitude).astype(np.float)
     longitude = np.array(longitude).astype(np.float)
     latitude = pd.DataFrame(latitude)
     longitude = pd.DataFrame(longitude)
-
     hex_ax = ax.hexbin(x = longitude, y= latitude, gridsize = 50)
     plt.xlabel('Longitude')
     plt.ylabel('Latitude')
     plt.title('Distribution of Received Calls over GPS Location')
-
     plt.savefig("heatplotCalls2.png")
 
 def fourTypes():
-    data_frame = pd.read_csv('./sfpd_dispatch_data_subset.csv')
 
+    #This method creates a scatter plot showing the Distribution of the different call
+    #types over GPS location
+
+    #Reads csv file into usable row
     file = open('sfpd_dispatch_data_subset.csv')
-
     csvFile1 = csv.reader(file)
     csvFile = []
-
     for row in csvFile1:
         csvFile.append(row)
 
-
-    potentialx = []
+    #Initialize arrays for longitude(x) and latitude(y) data for each call type
+    potentialx = [] #Potentially Life-Threatening
     potentialy = []
-    alarmx = []
+    alarmx = [] #Alarm
     alarmy = []
-    nonx = []
+    nonx = [] #Non Life-Threatening
     nony = []
-    firex = []
+    firex = [] #Fire
     firey = []
 
+    #Iterates through csv file and adds data points to appropriate call type array
     for row in csvFile:
-
         if row[25] == 'Potentially Life-Threatening':
             potentialx.append(float(row[35]))
             potentialy.append(float(row[34]))
@@ -314,6 +270,7 @@ def fourTypes():
             firex.append(float(row[35]))
             firey.append(float(row[34]))
 
+    #Plots four scatter plots over each other to show distribution of each call type
     figure4 = plt.figure()
     ax1 = figure4.add_subplot(111)
     ax1.scatter(potentialx, potentialy, color = '#3FB485', marker = '.', label = 'Potential Life-Threatening' )#, potential[0])
@@ -328,52 +285,39 @@ def fourTypes():
     figure4.savefig('fourTypes3.png')
 
 def safestAreas():
-    file = open('sfpd_dispatch_data_subset.csv')
 
+    #This method creates a three dimensional scatter plot to show the how dangerou
+    #different zip codes are based on the number of calls and their associated data
+    #Levels
+
+    #Reads csv file into usable row
+    file = open('sfpd_dispatch_data_subset.csv')
     csvFile1 = csv.reader(file)
     csvFile = []
-
     for row in csvFile1:
         csvFile.append(row)
-
-    temp = []
-    zipCodes = []
-    occurances = []
-    danger = []
-
     for element in csvFile1:
         csvFile.append(element)
 
-    for view in csvFile:
-        temp.append(int(view[17]))
+    #Creates a sorted array of zip codes without repetitions
+    zipCodes = getZipCodes()
 
-    temp = sort(temp)
-
-    for index in temp:
-        if index not in zipCodes:
-            zipCodes.append(index)
-
-    zipCodes = sort(zipCodes)
-
-    print zipCodes
-
+    #Calculates number of call received per zip code
+    occurances = []
     for row in zipCodes:
-
         count = 0
-
         for item in csvFile:
             if int(item[17]) == row:
                 count = count + 1
-
         occurances.append(count)
 
+    #Calculates associated danger levels per zip codes, values correspond to the labels
+    #as shown beneath
+    danger = []
     for item in zipCodes:
-
         count = 0
-
         for row in csvFile:
             if int(row[17]) == item:
-
                 if row[25] == 'Potentially Life-Threatening':
                     count = count + 5
                 elif row[25] == 'Fire':
@@ -382,24 +326,19 @@ def safestAreas():
                     count = count + 2
                 else:
                     count = count + 1
-
         danger.append(count)
 
-    temp1 = []
-
+    #Scales down values for easier intereptation in graph, scale is labeled on graph
+    temp=[]
     for item in zipCodes:
-        temp1.append(item - 94000)
-
-    zipCodes = temp1
-
+        temp.append(item - 94000)
+    zipCodes = temp
     temp = []
-
     for item in occurances:
         temp.append(item/100)
-
     occurances = temp
 
-
+    #Plots data according to number of calls and assoicated danger levels
     fig = plt.figure()
     ax = fig.add_subplot(111, projection = '3d')
     ax.scatter(zipCodes, occurances, danger, c = "#A004F2", marker = 'o')
@@ -410,18 +349,20 @@ def safestAreas():
     fig.savefig('safestAreas1.png')
 
 def getDayArray(zipCode):
+
+    #This method counts the number of calls per day of input zipCode and returns an array
+    #of values corresponding to the indicies of the days array below
+
+    #Reads csv into usable array
     file = open('sfpd_dispatch_data_subset.csv')
-
-    array = []
-
-    days = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
-
     csvFile1 = csv.reader(file)
     csvFile = []
-
     for row in csvFile1:
         csvFile.append(row)
 
+    #Counts the number of calls per day of the input zipCode and adds them to array
+    array = []
+    days = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
     for row in days:
         count = 0
         for item in csvFile:
@@ -434,35 +375,25 @@ def getDayArray(zipCode):
     return array
 
 def dayTrend():
-    file = open('sfpd_dispatch_data_subset.csv')
 
+    #This method shows the distribution of calls per day for each zip code
+
+    #Reads csv into usable array
+    file = open('sfpd_dispatch_data_subset.csv')
     csvFile1 = csv.reader(file)
     csvFile = []
-
     for row in csvFile1:
         csvFile.append(row)
 
-    temp = []
-    zipCodes = []
+    #Creates sorted array of zip codes, without repetitions
+    zipCodes = getZipCodes()
 
-    for element in csvFile1:
-        csvFile.append(element)
-
-    for view in csvFile:
-        temp.append(view[17])
-
-    temp = sort(temp)
-
-    for index in temp:
-        if index not in zipCodes:
-            zipCodes.append(index)
-
+    #Creates array to be used for labeling x values on graph
     days = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
 
     file.close()
 
-    array = getDayArray(zipCodes[0])
-
+    #Plots all the distributions for the zip codes in the same line graph
     fig = plt.figure()
     fig, ax = plt.subplots()
     plt.plot(days, getDayArray(zipCodes[0]), label = zipCodes[0])
@@ -500,18 +431,21 @@ def dayTrend():
     fig.savefig('dayTrend3.png')
 
 def getHourArray(zipCode):
+
+    #This method calcutates the number of hourly calls correspond to the input zipCode
+    #and returns an array with the values corresponding to the indicies of the hours array
+    #below
+
+    #Reads csv file into usable array
     file = open('sfpd_dispatch_data_subset.csv')
-
-    array = []
-
-    hours = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
-
     csvFile1 = csv.reader(file)
     csvFile = []
-
     for row in csvFile1:
         csvFile.append(row)
 
+    #Counts number of calls per hour of the input zipCode and adds them to array
+    array = []
+    hours = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
     for row in hours:
         count = 0
         for item in csvFile:
@@ -525,33 +459,25 @@ def getHourArray(zipCode):
     return array
 
 def hourTrend():
-    file = open('sfpd_dispatch_data_subset.csv')
 
+    #This method shows the distribution of hourly calls per zip code
+
+    #Reads csv into usable array
+    file = open('sfpd_dispatch_data_subset.csv')
     csvFile1 = csv.reader(file)
     csvFile = []
-
     for row in csvFile1:
         csvFile.append(row)
 
-    temp = []
-    zipCodes = []
+    #Creates a sorted array of zip codes withou repetitions
+    zipCodes = getZipCodes()
 
-    for element in csvFile1:
-        csvFile.append(element)
-
-    for view in csvFile:
-        temp.append(view[17])
-
-    temp = sort(temp)
-
-    for index in temp:
-        if index not in zipCodes:
-            zipCodes.append(index)
-
-    hours = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+    #Used to graph x axis values
+    hours = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
 
     file.close()
 
+    #Plots all the distributions for the zip codes in the same line graph
     figure = plt.figure()
     figure, ax = plt.subplots()
     plt.plot(hours, getHourArray(zipCodes[0]), label = zipCodes[0])
@@ -582,6 +508,7 @@ def hourTrend():
     plt.plot(hours, getHourArray(zipCodes[25]), label = zipCodes[25])
     plt.plot(hours, getHourArray(zipCodes[26]), label = zipCodes[26])
 
+    #Used to label x axis values
     hours = [0,2,4,6,8,10,12,14,16, 18,20,22]
 
     plt.legend(loc='upper right', prop={'size': 5.5})
@@ -591,4 +518,17 @@ def hourTrend():
     plt.title('Total Number of Calls per Hour Over 12 Days')
     figure.savefig('totalCalls1.png')
 
-dayTrend()
+def getGraphs():
+
+    #This method calls the methods to create and save all the graphs used for
+    #data analysis in this application
+    makeAverageDispatch()
+    hourTrend()
+    dayTrend()
+    makeHeatmap()
+    fourTypes()
+    safestAreas()
+
+#Calls method to get all graphs that are used in the webapp
+#getGraphs()
+hourTrend()

@@ -80,19 +80,15 @@ def index():
 def likelyDispatch():
 
     #Makes sure that method is only called when form data is POSTed
-
     if request.method == "POST":
 
         #Retrieve data from submitted form
-
         latitude = request.form.get("latitude")
         longitude = request.form.get("longitude")
         time = request.form.get("time")
 
         #Ensure data is within given GPS coordinates
-
-        if (37.70 <= latitude <=37.84) and (-122.52 <= longitude <= -122.36):
-
+        if (37.70 <= float(latitude) <= 37.84) and (-122.52 <= float(longitude) <= -122.36):
 
             try:
 
