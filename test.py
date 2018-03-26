@@ -438,7 +438,8 @@ def dayTrend():
     plt.legend(loc='upper right')
     plt.xlabel('Day (January ##, 2018)')
     plt.ylabel('Number of Calls')
-    fig.savefig('dayTrend.png')
+    plt.show()
+    #fig.savefig('dayTrend.png')
 
 def getHourArray(zipCode):
     file = open('sfpd_dispatch_data_subset.csv')
@@ -533,4 +534,8 @@ def makeLines():
     plt.title('Average Number of Calls in 24 Hour Period')
     plt.show()
 
-makeLines()
+def mostLikelyDispatch()
+    latitude = float(request.form.get("latitude"))
+    longitude = float(request.form.get("longitude"))
+    time = request.form.get("time")
+    time = datetime.timedelta(hours = time[0:2], minutes = time[3:5], seconds = time[6:8]).total_seconds()

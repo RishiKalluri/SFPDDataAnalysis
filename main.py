@@ -6,6 +6,14 @@ from flask import Flask, Markup, render_template, request
 import datetime
 from flask_bootstrap import Bootstrap
 import math
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from datetime import datetime, timedelta
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report, confusion_matrix
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -53,6 +61,51 @@ def replaceDistance(array, distance):
     else:
         return array
 
+def mostLikelyDispatch(lat, lon, time):
+    names = ['latitude', 'longitude', "received_timestamp", 'unit_type']
+    dataset = pd.read_csv('./sfpd_dispatch_data_subset_knn.csv')
+    dataset = pd.DataFrame(dataset, columns = names)
+
+    #Convert all timestamps into datetime.timedelta objects and get total_seconds
+    arr = []
+    count = 0
+    while(count<10000):
+        format = "%Y-%m-%d %H:%M:%S.%f %Z"
+        t = datetime.strptime(dataset.received_timestamp.at[count], format)
+        arr.append((timedelta(hours = t.hour, minutes = t.minute, seconds = t.second).total_seconds()))
+        count = count +1
+
+    #add new values for received_timestamp to dataset to be used for predictions
+    dataset['received_timestamp'] = arr
+
+    #manipulate input
+    lat = float(lat)
+    lon = float(lon)
+    format = "%H:%M:%S"
+    t = datetime.strptime(time, format)
+    time = timedelta(hours = t.hour, minutes = t.minute, seconds = t.second).total_seconds()
+
+    input = [[lat, lon, time]]
+
+    #set values to train classifier
+    xtrain = dataset.iloc[:, :-1].values
+    ytrain = dataset.iloc[:, 3].values
+
+    #Set train and test data
+    #xtrain, xtest, ytrain, ytest = train_test_split(x, y, test_size = 0.20)
+
+    #Normalize Columns, so there is no "overpowering" values
+    scaler = StandardScaler()
+    scaler.fit(xtrain)
+
+    xtrain = scaler.transform(xtrain)
+    input = scaler.transform(input)
+
+    classifier = KNeighborsClassifier(n_neighbors = 5)
+    classifier.fit(xtrain, ytrain)
+    output = classifier.predict(input)
+    return output
+
 @app.route("/")
 
 @app.route('/index.html')
@@ -68,80 +121,8 @@ def likelyDispatch():
         longitude = request.form.get("longitude")
         time = request.form.get("time")
 
-
-        file = open('sfpd_dispatch_data_subset.csv')
-
-        csvFile1 = csv.reader(file)
-        csvFile = []
-        times = []
-        timeCounter = []
-
-        for view in csvFile1:
-            csvFile.append(view)
-
-        closestLat = 0
-        closestLong = 0
-        distanceDiff = 100
-
-        for row in csvFile:
-
-            trueDistance = 0
-            longDiff = 0
-            latDiff = 0
-
-            latDiff = abs(float(latitude) - float(row[34]))
-
-            longDiff = abs(float(longitude) - float(row[35]))
-
-            trueDistance = getDistance(latDiff, longDiff)
-
-            if distanceDiff >= trueDistance:
-
-                closestLat = row[34]
-                closestLong = row[35]
-                distanceDiff = trueDistance
-
-        storeDiff = datetime.timedelta(hours = 24)
-        likelyDispatch = ''
-
-        for row in csvFile:
-
-            if -0.02 <= getDistance(float(latitude) - float(row[34]), float(longitude) - float(row[35])) <= 0.02 :
-
-                compareYear = row[6][0:4]
-                compareMonth = row[6][5:7]
-                compareDate = row[6][8:10]
-                compareHours = time[0:2]
-                compareMinutes = time[3:5]
-                compareSeconds = time[6:8]
-
-
-                time1 = datetime.datetime(year = int(compareYear), month = int(compareMonth), day = int(compareDate), hour = int(compareHours), minute = int(compareMinutes), second = int(compareSeconds))
-
-                receivedYear = row[6][0:4]
-                receivedMonth = row[6][5:7]
-                receivedDate = row[6][8:10]
-                receivedHours = row[6][11:13]
-                receivedMinutes = row[6][14:16]
-                receivedSeconds = row[6][17:19]
-
-                time2 = datetime.datetime(year = int(receivedYear), month = int(receivedMonth), day = int(receivedDate), hour = int(receivedHours), minute = int(receivedMinutes), second = int(receivedSeconds))
-
-                temp = 0
-
-                if time1 > time2:
-                    temp = time1 - time2
-                    print(temp)
-                else:
-                    temp = time2 - time1
-                    print(temp)
-
-                if storeDiff.total_seconds() > temp.total_seconds():
-                    likelyDispatch = row[27]
-                    print(likelyDispatch)
-                    storeDiff = temp
-
-        file.close()
+        likelyDispatch = mostLikelyDispatch(latitude, longitude, time)
+        print likelyDispatch
 
         return render_template('index.html', response = 'Dispatch: ' + likelyDispatch)
 
