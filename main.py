@@ -99,7 +99,7 @@ def likelyDispatch():
             except Exception as exception:
 
                 #In case time is inputted in a wrong format, or other error occurs
-                print exception
+
                 return render_template('index.html', response =  str(exception))
 
         else:
