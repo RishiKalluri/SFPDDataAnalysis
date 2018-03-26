@@ -86,7 +86,6 @@ simplejson==3.13.2
 singledispatch==3.4.0.3
 six==1.11.0
 sklearn==0.0
-supervisor==3.2.0
 terminado==0.8.1
 testpath==0.3.1
 tornado==5.0.1
