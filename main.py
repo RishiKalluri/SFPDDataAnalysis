@@ -1,19 +1,10 @@
-import csv
-import os, requests
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-from flask import Flask, Markup, render_template, request
+from flask import Flask,  render_template, request
 import datetime
 from flask_bootstrap import Bootstrap
-import math
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import datetime, timedelta
-from sklearn.model_selection import train_test_split
+from datetime import timedelta
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report, confusion_matrix
 
 app = Flask(__name__)
 Bootstrap(app)
