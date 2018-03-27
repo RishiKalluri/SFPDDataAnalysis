@@ -7,6 +7,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.colors as colors
 import pandas as pd
 
+#RUN IN PYTHON 2.7
+
 
 def getZipCodes():
 
@@ -248,7 +250,7 @@ def safestAreas():
     for row in zipCodes:
         count = 0
         for item in csvFile:
-            if int(item[17]) == row:
+            if item[17] == row:
                 count = count + 1
         occurances.append(count)
 
@@ -258,7 +260,7 @@ def safestAreas():
     for item in zipCodes:
         count = 0
         for row in csvFile:
-            if int(row[17]) == item:
+            if row[17] == item:
                 if row[25] == 'Potentially Life-Threatening':
                     count = count + 5
                 elif row[25] == 'Fire':
@@ -272,7 +274,7 @@ def safestAreas():
     #Scales down values for easier intereptation in graph, scale is labeled on graph
     temp=[]
     for item in zipCodes:
-        temp.append(item - 94000)
+        temp.append(int(item) - 94000)
     zipCodes = temp
     temp = []
     for item in occurances:

@@ -10,6 +10,9 @@ created using these arrays through the matplotlib and pandas libraries. All
 of this code can be found in getGraphs.py. Each graph creation has its own
 method, which are all called in the getGraphs() method in the .py file.
 
+
+THE FILE GETGRAPHS.PY MUST BE RUN IN PYTHON 2.7
+
 A k nearest neighbor algorithm was used to predict the most likely dispatch
 based on location and time. The model was trained using the latitude, longitude,
 and received timestamp from sfpd_dispatch_data_subset.csv. The prediction is
